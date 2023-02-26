@@ -16,23 +16,21 @@ public class GetProductsServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
-        try {
-            try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-                Statement stmt = c.createStatement();
-                ResultSet rs = stmt.executeQuery("SELECT * FROM PRODUCT");
-                response.getWriter().println("<html><body>");
+        try (
+                Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
+                Statement statement = connection.createStatement()
+        ) {
+            ResultSet rs = statement.executeQuery("SELECT * FROM PRODUCT");
+            response.getWriter().println("<html><body>");
 
-                while (rs.next()) {
-                    String  name = rs.getString("name");
-                    int price  = rs.getInt("price");
-                    response.getWriter().println(name + "\t" + price + "</br>");
-                }
-                response.getWriter().println("</body></html>");
-
-                rs.close();
-                stmt.close();
+            while (rs.next()) {
+                String name = rs.getString("name");
+                int price = rs.getInt("price");
+                response.getWriter().println(name + "\t" + price + "</br>");
             }
+            response.getWriter().println("</body></html>");
 
+            rs.close();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
