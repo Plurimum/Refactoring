@@ -1,5 +1,7 @@
 package ru.akirakozov.sd.refactoring.utils;
 
+import java.util.List;
+
 public class HtmlStringBuilder {
     private final StringBuilder result;
 
@@ -24,14 +26,8 @@ public class HtmlStringBuilder {
         return this;
     }
 
-    public HtmlStringBuilder appendNewLineString(String content) {
-        result.append(content).append(LINE_SEPARATOR);
-
-        return this;
-    }
-
-    public HtmlStringBuilder appendString(String content) {
-        result.append(content);
+    public HtmlStringBuilder appendLines(List<String> lines) {
+        lines.forEach(line -> result.append(line).append(LINE_SEPARATOR));
 
         return this;
     }

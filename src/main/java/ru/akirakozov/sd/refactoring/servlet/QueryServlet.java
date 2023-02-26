@@ -8,6 +8,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
 /**
  * @author akirakozov
@@ -22,41 +23,48 @@ public class QueryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter("command");
-        HtmlStringBuilder htmlStringBuilder = new HtmlStringBuilder();
 
-        switch (command) {
-            case "max" -> {
-                htmlStringBuilder.appendHeader("Product with max price: ");
-                productDao.getMaxPriceProduct().map(Product::valuesString)
-                        .ifPresent(htmlStringBuilder::appendWithLineBreak);
-            }
-            case "min" -> {
-                htmlStringBuilder.appendHeader("Product with min price: ");
-                productDao.getMinPriceProduct().map(Product::valuesString)
-                        .ifPresent(htmlStringBuilder::appendWithLineBreak);
-            }
-            case "sum" -> {
-                htmlStringBuilder.appendNewLineString("Summary price: ");
-                productDao.getSumPrice().map(String::valueOf)
-                        .ifPresent(htmlStringBuilder::appendNewLineString);
-            }
-            case "count" -> {
-                htmlStringBuilder.appendNewLineString("Number of products: ");
-                productDao.getCountOfProducts().map(String::valueOf)
-                        .ifPresent(htmlStringBuilder::appendNewLineString);
-            }
-            default -> {  // TODO: fix it
-                response.getWriter().println("Unknown command: " + command);
+        String result = switch (command) {
+            case "max" -> buildHtml(
+                        "Product with max price: ",
+                        productDao.getMaxPriceProduct()
+                                .map(Product::valuesString)
+                                .orElse("")
+                );
+            case "min" -> buildHtml(
+                        "Product with min price: ",
+                        productDao.getMinPriceProduct().map(Product::valuesString)
+                                .orElse("")
+                );
+            case "sum" -> buildHtml(List.of(
+                        "Summary price: ",
+                        productDao.getSumPrice().map(String::valueOf)
+                                .orElse("")
+                ));
+            case "count" -> buildHtml(List.of(
+                        "Number of products: ",
+                        productDao.getCountOfProducts().map(String::valueOf)
+                                .orElse("")
+                ));
+            default -> "Unknown command: " + command;
+        };
 
-                response.setContentType("text/html");
-                response.setStatus(HttpServletResponse.SC_OK);
-                return;
-            }
-        }
-
-        response.getWriter().println(htmlStringBuilder.build());
+        response.getWriter().println(result);
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
+    }
+
+    private String buildHtml(String header, String lineToBreak) {
+        return new HtmlStringBuilder()
+                .appendHeader(header)
+                .appendWithLineBreak(lineToBreak)
+                .build();
+    }
+
+    private String buildHtml(List<String> lines) {
+        return new HtmlStringBuilder()
+                .appendLines(lines)
+                .build();
     }
 }

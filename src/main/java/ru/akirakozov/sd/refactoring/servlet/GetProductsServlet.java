@@ -1,6 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.dao.ProductDao;
+import ru.akirakozov.sd.refactoring.model.Product;
 import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
 import javax.servlet.http.HttpServlet;
@@ -22,7 +23,7 @@ public class GetProductsServlet extends HttpServlet {
         try {
             HtmlStringBuilder htmlStringBuilder = new HtmlStringBuilder();
             productDao.findAll().stream()
-                    .map(product -> product.name() + "\t" + product.price())
+                    .map(Product::valuesString)
                     .forEach(htmlStringBuilder::appendWithLineBreak);
 
             response.getWriter().println(htmlStringBuilder.build());
