@@ -4,14 +4,12 @@ import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import ru.akirakozov.sd.refactoring.model.Product;
 import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 /**
  * @author akirakozov
  */
-public class GetProductsServlet extends HttpServlet {
+public class GetProductsServlet extends AbstractProductServlet {
     private final ProductDao productDao;
 
     public GetProductsServlet(ProductDao productDao) {
@@ -19,19 +17,16 @@ public class GetProductsServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) {
+    protected String doGet(HttpServletRequest request) {
         try {
             HtmlStringBuilder htmlStringBuilder = new HtmlStringBuilder();
             productDao.findAll().stream()
                     .map(Product::valuesString)
                     .forEach(htmlStringBuilder::appendWithLineBreak);
 
-            response.getWriter().println(htmlStringBuilder.build());
+            return htmlStringBuilder.build();
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
-
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 }

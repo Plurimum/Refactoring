@@ -4,16 +4,13 @@ import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import ru.akirakozov.sd.refactoring.model.Product;
 import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 /**
  * @author akirakozov
  */
-public class QueryServlet extends HttpServlet {
+public class QueryServlet extends AbstractProductServlet {
     private final ProductDao productDao;
 
     public QueryServlet(ProductDao productDao) {
@@ -21,10 +18,10 @@ public class QueryServlet extends HttpServlet {
     }
 
     @Override
-    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    protected String doGet(HttpServletRequest request) {
         String command = request.getParameter("command");
 
-        String result = switch (command) {
+        return switch (command) {
             case "max" -> buildHtml(
                         "Product with max price: ",
                         productDao.getMaxPriceProduct()
@@ -48,11 +45,6 @@ public class QueryServlet extends HttpServlet {
                 ));
             default -> "Unknown command: " + command;
         };
-
-        response.getWriter().println(result);
-
-        response.setContentType("text/html");
-        response.setStatus(HttpServletResponse.SC_OK);
     }
 
     private String buildHtml(String header, String lineToBreak) {
