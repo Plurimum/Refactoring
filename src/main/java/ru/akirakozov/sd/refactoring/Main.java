@@ -7,10 +7,7 @@ import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import ru.akirakozov.sd.refactoring.servlet.AddProductServlet;
 import ru.akirakozov.sd.refactoring.servlet.GetProductsServlet;
 import ru.akirakozov.sd.refactoring.servlet.QueryServlet;
-
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
+import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
 /**
  * @author akirakozov
@@ -25,6 +22,8 @@ public class Main {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
+
+        HtmlStringBuilder htmlCreator = new HtmlStringBuilder();
 
         context.addServlet(new ServletHolder(new AddProductServlet(productDao)), "/add-product");
         context.addServlet(new ServletHolder(new GetProductsServlet(productDao)),"/get-products");

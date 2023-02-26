@@ -2,15 +2,12 @@ package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import ru.akirakozov.sd.refactoring.model.Product;
+import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.io.PrintWriter;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.Statement;
 
 /**
  * @author akirakozov
@@ -25,55 +22,41 @@ public class QueryServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String command = request.getParameter("command");
-        StringBuilder body = new StringBuilder();
+        HtmlStringBuilder htmlStringBuilder = new HtmlStringBuilder();
 
         switch (command) {
             case "max" -> {
-                body.append(String.format("<h1>Product with max price: </h1>%n"));
-
-                productDao.getMaxPriceProduct().map(this::toHtmlString)
-                        .ifPresent(body::append);
+                htmlStringBuilder.appendHeader("Product with max price: ");
+                productDao.getMaxPriceProduct().map(Product::valuesString)
+                        .ifPresent(htmlStringBuilder::appendWithLineBreak);
             }
             case "min" -> {
-                body.append(String.format("<h1>Product with min price: </h1>%n"));
-
-                productDao.getMinPriceProduct().map(this::toHtmlString)
-                        .ifPresent(body::append);
+                htmlStringBuilder.appendHeader("Product with min price: ");
+                productDao.getMinPriceProduct().map(Product::valuesString)
+                        .ifPresent(htmlStringBuilder::appendWithLineBreak);
             }
             case "sum" -> {
-                body.append(String.format("Summary price: %n"));
-
-                productDao.getSumPrice().ifPresent(body::append);
+                htmlStringBuilder.appendNewLineString("Summary price: ");
+                productDao.getSumPrice().map(String::valueOf)
+                        .ifPresent(htmlStringBuilder::appendNewLineString);
             }
             case "count" -> {
-                body.append(String.format("Number of products: %n"));
-
-                productDao.getCountOfProducts().ifPresent(body::append);
+                htmlStringBuilder.appendNewLineString("Number of products: ");
+                productDao.getCountOfProducts().map(String::valueOf)
+                        .ifPresent(htmlStringBuilder::appendNewLineString);
             }
-            default -> response.getWriter().println("Unknown command: " + command);
+            default -> {  // TODO: fix it
+                response.getWriter().println("Unknown command: " + command);
+
+                response.setContentType("text/html");
+                response.setStatus(HttpServletResponse.SC_OK);
+                return;
+            }
         }
 
-        printIntoHtml(response.getWriter(), body.toString());
+        response.getWriter().println(htmlStringBuilder.build());
 
         response.setContentType("text/html");
         response.setStatus(HttpServletResponse.SC_OK);
-    }
-
-    private void printIntoHtml(PrintWriter writer, String body) {
-        if (body.isBlank()) {
-            return;
-        }
-
-        writer.println("<html><body>");
-        writer.println(body);
-        writer.println("</body></html>");
-    }
-
-    private String toHtmlString(Product product) {
-        return String.format(
-                "%s\t%d</br>",
-                product.name(),
-                product.price()
-        );
     }
 }

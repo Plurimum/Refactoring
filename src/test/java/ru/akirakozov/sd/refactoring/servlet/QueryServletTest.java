@@ -1,7 +1,6 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import org.junit.jupiter.api.Test;
-import ru.akirakozov.sd.refactoring.model.Product;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;

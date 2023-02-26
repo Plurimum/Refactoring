@@ -1,13 +1,11 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import ru.akirakozov.sd.refactoring.dao.ProductDao;
-import ru.akirakozov.sd.refactoring.model.Product;
+import ru.akirakozov.sd.refactoring.utils.HtmlStringBuilder;
 
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
-import java.util.List;
 
 /**
  * @author akirakozov
@@ -22,14 +20,12 @@ public class GetProductsServlet extends HttpServlet {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) {
         try {
-            List<Product> products = productDao.findAll();
-            response.getWriter().println("<html><body>");
+            HtmlStringBuilder htmlStringBuilder = new HtmlStringBuilder();
+            productDao.findAll().stream()
+                    .map(product -> product.name() + "\t" + product.price())
+                    .forEach(htmlStringBuilder::appendWithLineBreak);
 
-            for (Product product : products) {
-                response.getWriter().println(product.name() + "\t" + product.price() + "</br>");
-            }
-
-            response.getWriter().println("</body></html>");
+            response.getWriter().println(htmlStringBuilder.build());
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
