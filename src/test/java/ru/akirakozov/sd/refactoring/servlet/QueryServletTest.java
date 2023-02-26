@@ -1,34 +1,25 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import ru.akirakozov.sd.refactoring.dao.ProductDao;
+import ru.akirakozov.sd.refactoring.model.Product;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class QueryServletTest {
-    private final ProductDao productDao;
-
-    public QueryServletTest() {
-        this.productDao = new ProductDao();
-    }
-
-    @AfterEach
-    @BeforeEach
-    public final void cleanDatabase() {
-        productDao.cleanTable();
-    }
+public class QueryServletTest extends BaseTest {
 
     @Test
     void testQuerySingle() throws IOException {
-        productDao.addProduct("milk", 50);
+        when(productDao.getMaxPriceProduct()).thenReturn(Optional.of(MILK));
+        when(productDao.getMinPriceProduct()).thenReturn(Optional.of(MILK));
+        when(productDao.getSumPrice()).thenReturn(Optional.of(50L));
+        when(productDao.getCountOfProducts()).thenReturn(Optional.of(1L));
 
         testCommands("milk\t50</br>", "milk\t50</br>", 50, 1);
     }
@@ -38,15 +29,19 @@ public class QueryServletTest {
         productDao.addProduct("milk", 50);
         productDao.addProduct("bread", 30);
         productDao.addProduct("meat", 250);
+        when(productDao.getMaxPriceProduct()).thenReturn(Optional.of(MEAT));
+        when(productDao.getMinPriceProduct()).thenReturn(Optional.of(BREAD));
+        when(productDao.getCountOfProducts()).thenReturn(Optional.of(3L));
+        when(productDao.getSumPrice()).thenReturn(Optional.of(50L + 30 + 250));
 
-        testCommands("meat\t250</br>", "bread\t30</br>", 50 + 30 + 250, 3);
+        testCommands("meat\t250</br>", "bread\t30</br>", 50L + 30 + 250, 3L);
     }
 
-    private void testCommands(String maxProduct, String minProduct, int sumProduct, int countProduct) throws IOException {
+    private void testCommands(String maxProduct, String minProduct, long sumProduct, long countProduct) throws IOException {
         String max = String.format("<html><body>%n<h1>Product with max price: </h1>%n%s%n</body></html>%n", maxProduct);
         String min = String.format("<html><body>%n<h1>Product with min price: </h1>%n%s%n</body></html>%n", minProduct);
-        String sum = String.format("<html><body>%nSummary price: %n%s%n</body></html>%n", sumProduct);
-        String count = String.format("<html><body>%nNumber of products: %n%s%n</body></html>%n", countProduct);
+        String sum = String.format("<html><body>%nSummary price: %n%d%n</body></html>%n", sumProduct);
+        String count = String.format("<html><body>%nNumber of products: %n%d%n</body></html>%n", countProduct);
 
         testCommand("max", max);
         testCommand("min", min);
@@ -62,7 +57,7 @@ public class QueryServletTest {
         when(request.getParameter("command")).thenReturn(command);
         when(response.getWriter()).thenReturn(new ResponseWriter());
 
-        new QueryServlet(new ProductDao()).doGet(request, response);
+        new QueryServlet(productDao).doGet(request, response);
         assertEquals(expectedResponse, response.getWriter().toString());
     }
 }

@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-public class AddProductServletTest {
+public class AddProductServletTest extends BaseTest {
     @Test
     void testAddProduct() throws IOException {
         HttpServletRequest request = mock(HttpServletRequest.class);
@@ -22,7 +22,7 @@ public class AddProductServletTest {
         when(request.getParameter("name")).thenReturn("milk");
         when(request.getParameter("price")).thenReturn("50");
 
-        new AddProductServlet(new ProductDao()).doGet(request, response);
+        new AddProductServlet(productDao).doGet(request, response);
         assertEquals("OK", response.getWriter().toString().trim());
     }
 }

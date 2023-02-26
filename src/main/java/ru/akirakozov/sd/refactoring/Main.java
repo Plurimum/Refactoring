@@ -33,10 +33,11 @@ public class Main {
         ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
         context.setContextPath("/");
         server.setHandler(context);
+        ProductDao productDao = new ProductDao();
 
-        context.addServlet(new ServletHolder(new AddProductServlet(new ProductDao())), "/add-product");
-        context.addServlet(new ServletHolder(new GetProductsServlet(new ProductDao())),"/get-products");
-        context.addServlet(new ServletHolder(new QueryServlet(new ProductDao())),"/query");
+        context.addServlet(new ServletHolder(new AddProductServlet(productDao)), "/add-product");
+        context.addServlet(new ServletHolder(new GetProductsServlet(productDao)),"/get-products");
+        context.addServlet(new ServletHolder(new QueryServlet(productDao)),"/query");
 
         server.start();
         server.join();
