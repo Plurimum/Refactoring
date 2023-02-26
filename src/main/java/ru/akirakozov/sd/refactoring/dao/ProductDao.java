@@ -39,6 +39,10 @@ public class ProductDao {
         executeUpdate(sql);
     }
 
+    public void cleanTable() {
+        executeUpdate("DELETE FROM PRODUCT");
+    }
+
     public Optional<Product> getMaxPriceProduct() {
         return executeQuery(
                 "select * from product order by price desc limit 1",

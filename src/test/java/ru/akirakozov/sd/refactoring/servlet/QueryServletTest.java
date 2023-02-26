@@ -8,44 +8,37 @@ import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class QueryServletTest {
+    private final ProductDao productDao;
+
+    public QueryServletTest() {
+        this.productDao = new ProductDao();
+    }
+
     @AfterEach
     @BeforeEach
-    public final void cleanDatabase() throws SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            Statement statement = c.createStatement();
-            statement.executeUpdate("DELETE FROM PRODUCT");
-        }
+    public final void cleanDatabase() {
+        productDao.cleanTable();
     }
 
     @Test
-    void testQuerySingle() throws IOException, SQLException {
-        try (
-                Connection c = DriverManager.getConnection("jdbc:sqlite:test.db");
-                Statement statement = c.createStatement()
-        ) {
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"milk\", 50)");
-        }
+    void testQuerySingle() throws IOException {
+        productDao.addProduct("milk", 50);
+
         testCommands("milk\t50</br>", "milk\t50</br>", 50, 1);
     }
 
     @Test
-    void testQueryMany() throws IOException, SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            Statement statement = c.createStatement();
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"milk\", 50)");
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"bread\", 30)");
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"meat\", 250)");
-        }
+    void testQueryMany() throws IOException {
+        productDao.addProduct("milk", 50);
+        productDao.addProduct("bread", 30);
+        productDao.addProduct("meat", 250);
+
         testCommands("meat\t250</br>", "bread\t30</br>", 50 + 30 + 250, 3);
     }
 

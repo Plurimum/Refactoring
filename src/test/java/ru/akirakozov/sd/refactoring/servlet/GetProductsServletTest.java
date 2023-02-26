@@ -8,35 +8,27 @@ import ru.akirakozov.sd.refactoring.dao.ProductDao;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.SQLException;
-import java.sql.Statement;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 public class GetProductsServletTest {
+    private final ProductDao productDao;
+
+    public GetProductsServletTest() {
+        this.productDao = new ProductDao();
+    }
+
     @AfterEach
     @BeforeEach
-    public final void cleanDatabase() throws SQLException {
-        try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
-                Statement statement = connection.createStatement()
-        ) {
-            statement.executeUpdate("DELETE FROM PRODUCT");
-        }
+    public final void cleanDatabase() {
+        productDao.cleanTable();
     }
 
     @Test
-    void testGetSingle() throws SQLException, IOException {
-        try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
-                Statement statement = connection.createStatement()
-        ) {
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"milk\", 50)");
-        }
+    void testGetSingle() throws IOException {
+        productDao.addProduct("milk", 50);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
@@ -49,15 +41,10 @@ public class GetProductsServletTest {
     }
 
     @Test
-    void testGetMany() throws SQLException, IOException {
-        try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
-                Statement statement = connection.createStatement()
-        ) {
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"milk\", 50)");
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"bread\", 30)");
-            statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"meat\", 250)");
-        }
+    void testGetMany() throws IOException {
+        productDao.addProduct("milk", 50);
+        productDao.addProduct("bread", 30);
+        productDao.addProduct("meat", 250);
 
         HttpServletRequest request = mock(HttpServletRequest.class);
 
