@@ -39,8 +39,16 @@ public class ProductDao {
         executeUpdate(sql);
     }
 
-    public void cleanTable() {
-        executeUpdate("DELETE FROM PRODUCT");
+    public void createTable() {
+        String sql = """
+                create table if not exists product
+                (
+                id integer primary key autoincrement not null,
+                name text not null,
+                price int not null
+                )
+                """;
+        executeUpdate(sql);
     }
 
     public Optional<Product> getMaxPriceProduct() {
