@@ -1,6 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
 import org.junit.jupiter.api.Test;
+import ru.akirakozov.sd.refactoring.dao.ProductDao;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -21,7 +22,7 @@ public class AddProductServletTest {
         when(request.getParameter("name")).thenReturn("milk");
         when(request.getParameter("price")).thenReturn("50");
 
-        new AddProductServlet().doGet(request, response);
+        new AddProductServlet(new ProductDao()).doGet(request, response);
         assertEquals("OK", response.getWriter().toString().trim());
     }
 }

@@ -3,6 +3,7 @@ package ru.akirakozov.sd.refactoring.servlet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import ru.akirakozov.sd.refactoring.dao.ProductDao;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -28,8 +29,10 @@ public class QueryServletTest {
 
     @Test
     void testQuerySingle() throws IOException, SQLException {
-        try (Connection c = DriverManager.getConnection("jdbc:sqlite:test.db")) {
-            Statement statement = c.createStatement();
+        try (
+                Connection c = DriverManager.getConnection("jdbc:sqlite:test.db");
+                Statement statement = c.createStatement()
+        ) {
             statement.executeUpdate("INSERT INTO PRODUCT (NAME, PRICE) VALUES (\"milk\", 50)");
         }
         testCommands("milk\t50</br>", "milk\t50</br>", 50, 1);
@@ -66,7 +69,7 @@ public class QueryServletTest {
         when(request.getParameter("command")).thenReturn(command);
         when(response.getWriter()).thenReturn(new ResponseWriter());
 
-        new QueryServlet().doGet(request, response);
+        new QueryServlet(new ProductDao()).doGet(request, response);
         assertEquals(expectedResponse, response.getWriter().toString());
     }
 }

@@ -1,5 +1,7 @@
 package ru.akirakozov.sd.refactoring.servlet;
 
+import ru.akirakozov.sd.refactoring.dao.ProductDao;
+
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -12,19 +14,19 @@ import java.sql.Statement;
  * @author akirakozov
  */
 public class AddProductServlet extends HttpServlet {
+    private final ProductDao productDao;
+
+    public AddProductServlet(ProductDao productDao) {
+        this.productDao = productDao;
+    }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws IOException {
         String name = request.getParameter("name");
         long price = Long.parseLong(request.getParameter("price"));
 
-        try (
-                Connection connection = DriverManager.getConnection("jdbc:sqlite:test.db");
-                Statement statement = connection.createStatement()
-        ) {
-            String sql = "INSERT INTO PRODUCT " +
-                    "(NAME, PRICE) VALUES (\"" + name + "\"," + price + ")";
-            statement.executeUpdate(sql);
+        try {
+            productDao.addProduct(name, price);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
